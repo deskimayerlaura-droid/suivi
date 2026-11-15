@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Suivi patinage">
+<meta name="theme-color" content="#f3f8fb">
+<title>Suivi patinage</title>
+<style>
+:root{--bg:#f3f8fb;--surface:#fff;--fg:#1f3446;--muted:#5f7a8e;--line:#d9e6ee;--accent:#2f86b8;--accent-fg:#fff;--soft:#e3f1f9;
+ --good:#8fd6ae;--mid:#f4e39a;--bad:#f2a197;--warn:#a63a2b;
+ --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.45;
+ padding:20px max(16px,env(safe-area-inset-right)) 20px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;min-height:calc(100vh - 40px)}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+.link{background:none;border:0;color:var(--muted);font-size:14px;padding:8px 4px;text-decoration:underline}
+.btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:14px;padding:16px 28px;font-weight:700;font-size:18px;min-height:56px}
+.btn[disabled]{opacity:.35}
+.btn.ghost{background:transparent;color:var(--fg);border:2px solid var(--line)}
+h2{font-size:30px;line-height:1.2;margin:0;text-wrap:balance}
+p{margin:0}.muted,.hint{color:var(--muted)}.hint{font-size:15px}
+.tabs{display:flex;gap:8px}
+.tab{flex:1;border:2px solid var(--line);background:transparent;border-radius:14px;padding:14px;font-weight:700;font-size:17px}
+.tab.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.name{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:20px 12px;font-weight:600;font-size:20px;text-align:center;min-height:72px}
+.name:active{background:var(--soft);border-color:var(--accent)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.empty{background:var(--surface);border:2px dashed var(--line);border-radius:16px;padding:20px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip{border:2px solid var(--line);background:transparent;border-radius:999px;padding:8px 18px;font-weight:600}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.step{width:48px;height:48px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-size:24px;font-weight:700}
+input[type=text]{font:inherit;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;flex:1;min-width:0}
+.dots{display:flex;gap:6px}.dots i{flex:1;height:6px;border-radius:3px;background:var(--line)}.dots i.on{background:var(--accent)}
+.q{display:flex;flex-direction:column;gap:28px;flex:1}
+.slider{touch-action:pan-y;user-select:none;-webkit-user-select:none;padding:34px 22px 10px;cursor:pointer;outline:none}
+.track{position:relative;height:22px;border-radius:11px;background:linear-gradient(90deg,var(--good),var(--mid),var(--bad))}
+.thumb{position:absolute;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:var(--surface);
+ border:5px solid var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.25);opacity:0;transform:scale(.6);transition:opacity .12s,transform .12s;pointer-events:none}
+.slider.touched .thumb{opacity:1;transform:scale(1)}
+.ends{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:16px;padding:0 4px}
+.ends span:last-child{text-align:right}
+.face{text-align:center;font-size:92px;line-height:1.1;min-height:104px}
+.rpeword{text-align:center;font-size:26px;font-weight:700;min-height:36px}
+.yn{display:flex;gap:16px}.yn .btn{flex:1;background:var(--surface);color:var(--fg);border:3px solid var(--line);font-size:24px;min-height:90px}
+.yn .btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px}
+.tick{width:84px;height:84px;border-radius:50%;background:var(--good);display:grid;place-items:center;font-size:44px}
+.err{color:var(--warn);font-size:15px}
+textarea{font:inherit;color:var(--fg);background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:14px;width:100%;min-height:150px;resize:vertical}
+@media (max-width:480px){h2{font-size:25px}}
+@media (prefers-reduced-motion:reduce){.thumb{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(function(){
+"use strict";
+/* ---------- Données ---------- */
+var ITEMS=[
+ {k:"sommeil",t:"Comment as-tu dormi cette nuit ?",h:"Qualité de ton sommeil.",l:"Très très bien",r:"Très très mal"},
+ {k:"stress",t:"À quel point te sens-tu stressée aujourd’hui ?",h:"Stress, soucis, pression.",l:"Très très faible",r:"Très très élevé"},
+ {k:"fatigue",t:"À quel point te sens-tu fatiguée ?",h:"Fatigue du corps et de la tête.",l:"Très très faible",r:"Très très élevée"},
+ {k:"courbatures",t:"Quelles courbatures as-tu dans les muscles ?",h:"Muscles qui tirent ou qui font mal après l’effort.",l:"Très très faibles",r:"Très très fortes"},
+ {k:"humeur",t:"Je suis de bonne humeur",h:"",l:"Tout à fait",r:"Pas du tout"},
+ {k:"confiance",t:"Je me sens confiante",h:"",l:"Tout à fait",r:"Pas du tout"},
+ {k:"motivation",t:"Je suis motivée aujourd’hui pour l’entraînement",h:"",l:"Tout à fait",r:"Pas du tout"},
+ {k:"commentaire",txt:1,t:"Commentaires",h:"Si tu veux ajouter quelque chose (facultatif)."}
+];
+var RPE=[["😴","Repos"],["😄","Très très facile"],["😊","Facile"],["🙂","Moyen"],["😐","Un peu dur"],["😕","Dur"],
+ ["😟","Plus que dur"],["😣","Très dur"],["😖","Très très dur"],["😫","Presque maximal"],["🥵","Maximal : impossible de faire plus"]];
+var app=document.getElementById("app");
+var LS=window.localStorage;
+function ls(k,v){try{if(v===undefined)return LS.getItem(k);if(v===null)LS.removeItem(k);else LS.setItem(k,v)}catch(e){}return null}
+var cfg=JSON.parse(ls("cfg")||"null")||{mode:"debut",seance:"Glace",duree:60};
+var endpoint=ls("endpoint")||"";
+var roster=JSON.parse(ls("roster")||"[]");
+var queue=JSON.parse(ls("queue")||"[]");
+var S={view:"home",skater:null,step:0,ans:{},setup:false,msg:""};
+var doneTimer=null;
+function saveCfg(){ls("cfg",JSON.stringify(cfg))}
+function saveQueue(){ls("queue",JSON.stringify(queue))}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function pad(n){return String(n).padStart(2,"0")}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+
+/* ---------- Envoi vers le Google Sheet ---------- */
+var sending=false;
+function flush(){
+  if(!endpoint||sending||!queue.length)return;
+  sending=true;
+  var item=queue[0];
+  fetch(endpoint,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(item)})
+   .then(function(){queue.shift();saveQueue();sending=false;if(S.view==="home")render();flush()})
+   .catch(function(){sending=false});
+}
+function loadRoster(){
+  if(!endpoint)return;
+  fetch(endpoint).then(function(r){return r.json()}).then(function(j){
+    if(j&&Array.isArray(j.names)){roster=j.names;ls("roster",JSON.stringify(roster));if(S.view==="home")render()}
+  }).catch(function(){});
+}
+function submit(rec){queue.push(rec);saveQueue();flush()}
+
+/* ---------- Rendu ---------- */
+function render(){
+  if(S.view==="home")return home();
+  if(S.view==="q")return question();
+  if(S.view==="rpe")return rpePage();
+  if(S.view==="done")return done();
+}
+function head(r){return '<header><h1>Suivi patinage</h1>'+(r||"")+'</header>'}
+
+function home(){
+  var h=head('<button class="link" id="gear">Réglages</button>');
+  if(S.setup||!endpoint){
+    h+='<h2>Réglages</h2><div class="box"><p>Colle ici l’adresse du script Google (voir le pas-à-pas).</p>'+
+     '<div class="row"><input type="text" id="ep" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(endpoint)+'" autocomplete="off" autocapitalize="off"></div>'+
+     '<div class="row"><button class="btn" id="saveEp">Enregistrer</button>'+(endpoint?'<button class="btn ghost" id="cancelEp">Annuler</button>':"")+'</div>'+
+     '<p class="hint">'+queue.length+' envoi(s) en attente sur cette tablette.</p><p class="err">'+esc(S.msg)+'</p></div>';
+    app.innerHTML=h;
+    document.getElementById("saveEp").onclick=function(){
+      var v=document.getElementById("ep").value.trim();
+      if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(v)){S.msg="L’adresse doit commencer par https://script.google.com/ et finir par /exec.";render();return}
+      endpoint=v;ls("endpoint",v);S.setup=false;S.msg="";loadRoster();flush();render()};
+    var c=document.getElementById("cancelEp");if(c)c.onclick=function(){S.setup=false;S.msg="";render()};
+    document.getElementById("gear").onclick=function(){};
+    return;
+  }
+  h+='<div class="tabs"><button class="tab'+(cfg.mode==="debut"?" on":"")+'" data-m="debut">Début de séance</button><button class="tab'+(cfg.mode==="fin"?" on":"")+'" data-m="fin">Fin de séance</button></div>';
+  if(cfg.mode==="fin"){
+    h+='<div class="box"><div class="row"><span class="muted">Séance :</span>'+["Glace","PPG","Autre"].map(function(t){return '<button class="chip'+(cfg.seance===t?" on":"")+'" data-s="'+t+'">'+t+'</button>'}).join("")+'</div>'+
+     '<div class="row"><span class="muted">Durée :</span><button class="step" id="dm">−</button><b id="dv">'+cfg.duree+' min</b><button class="step" id="dp">+</button></div></div>';
+  }
+  h+='<h2>Qui es-tu ?</h2>';
+  if(!roster.length)h+='<div class="empty">Liste vide. Écris les prénoms dans l’onglet « Patineuses » du Google Sheet, puis rouvre cette page.</div>';
+  else h+='<div class="names">'+roster.map(function(n,i){return '<button class="name" data-i="'+i+'">'+esc(n)+'</button>'}).join("")+'</div>';
+  if(queue.length)h+='<p class="hint">'+queue.length+' réponse(s) en attente d’envoi (connexion ?).</p>';
+  app.innerHTML=h;
+  document.getElementById("gear").onclick=function(){S.setup=true;render()};
+  app.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){cfg.mode=b.dataset.m;saveCfg();render()}});
+  app.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){cfg.seance=b.dataset.s;saveCfg();render()}});
+  var dm=document.getElementById("dm"),dp=document.getElementById("dp");
+  if(dm){dm.onclick=function(){cfg.duree=Math.max(5,cfg.duree-5);saveCfg();render()};dp.onclick=function(){cfg.duree=Math.min(240,cfg.duree+5);saveCfg();render()}}
+  app.querySelectorAll(".name").forEach(function(b){b.onclick=function(){
+    S.skater=roster[+b.dataset.i];S.step=0;S.ans={};S.view=cfg.mode==="fin"?"rpe":"q";render()}});
+}
+
+function slider(host,opts){
+  /* opts: n (nb de positions si discret, sinon continu), min, max, value, onChange */
+  host.innerHTML='<div class="slider" tabindex="0" role="slider"><div class="track"><div class="thumb"></div></div></div>';
+  var sl=host.firstChild,tr=sl.firstChild,th=tr.firstChild,drag=false;
+  function show(f){th.style.left=(f*100)+"%";sl.classList.add("touched")}
+  function setF(f){
+    f=Math.max(0,Math.min(1,f));var v;
+    if(opts.discrete){v=Math.round(f*(opts.max-opts.min))+opts.min;f=(v-opts.min)/(opts.max-opts.min)}
+    else v=Math.round((opts.min+(opts.max-opts.min)*f)*10)/10;
+    show(f);sl.setAttribute("aria-valuenow",v);opts.onChange(v);
+  }
+  if(opts.value!=null)show((opts.value-opts.min)/(opts.max-opts.min));
+  function ev(e){var r=tr.getBoundingClientRect();setF((e.clientX-r.left)/r.width)}
+  sl.addEventListener("pointerdown",function(e){drag=true;try{sl.setPointerCapture(e.pointerId)}catch(_){}ev(e)});
+  sl.addEventListener("pointermove",function(e){if(drag)ev(e)});
+  function up(){drag=false}
+  sl.addEventListener("pointerup",up);sl.addEventListener("pointercancel",up);
+  sl.addEventListener("keydown",function(e){
+    var d=e.key==="ArrowRight"||e.key==="ArrowUp"?1:e.key==="ArrowLeft"||e.key==="ArrowDown"?-1:0;if(!d)return;e.preventDefault();
+    var cur=opts.value!=null?opts.value:(opts.min+opts.max)/2,st=opts.discrete?1:0.5;
+    cur=Math.max(opts.min,Math.min(opts.max,cur+d*st));opts.value=cur;setF((cur-opts.min)/(opts.max-opts.min))});
+}
+
+function question(){
+  var it=ITEMS[S.step],last=S.step===ITEMS.length-1,has=it.txt||S.ans[it.k]!=null;
+  var dots=ITEMS.map(function(_,i){return '<i class="'+(i<=S.step?"on":"")+'"></i>'}).join("");
+  var body;
+  if(it.txt){
+    body='<textarea id="cm" maxlength="500" placeholder="Écris ici…">'+esc(S.ans.commentaire||"")+'</textarea>';
+  }else if(it.yn){
+    body='<div class="yn"><button class="btn'+(S.ans[it.k]==="Oui"?" on":"")+'" data-v="Oui">Oui</button><button class="btn'+(S.ans[it.k]==="Non"?" on":"")+'" data-v="Non">Non</button></div>';
+  }else{
+    body='<div id="sh"></div><div class="ends"><span>'+esc(it.l)+'</span><span>'+esc(it.r)+'</span></div>'+
+     '<p class="hint" style="text-align:center" id="tip">'+(has?"Tu peux encore bouger le curseur.":"Touche la barre à l’endroit qui te correspond.")+'</p>';
+  }
+  app.innerHTML=head('<span class="muted">'+esc(S.skater)+'</span>')+'<div class="dots">'+dots+'</div>'+
+   '<div class="q"><div><h2>'+esc(it.t)+'</h2>'+(it.h?'<p class="hint" style="margin-top:8px">'+esc(it.h)+'</p>':"")+'</div><div>'+body+'</div>'+
+   '<div class="nav"><button class="btn ghost" id="bk">'+(S.step?"Retour":"Annuler")+'</button><button class="btn" id="nx"'+(has?"":" disabled")+'>'+(last?"Envoyer":"Suivant")+'</button></div></div>';
+  var nx=document.getElementById("nx");
+  if(it.txt){
+    document.getElementById("cm").oninput=function(e){S.ans.commentaire=e.target.value};
+  }else if(it.yn){
+    app.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){S.ans[it.k]=b.dataset.v;
+      app.querySelectorAll("[data-v]").forEach(function(x){x.classList.toggle("on",x===b)});nx.disabled=false}});
+  }else{
+    slider(document.getElementById("sh"),{min:1,max:7,value:S.ans[it.k],onChange:function(v){S.ans[it.k]=v;nx.disabled=false;document.getElementById("tip").textContent="Tu peux encore bouger le curseur."}});
+  }
+  document.getElementById("bk").onclick=function(){if(S.step){S.step--;render()}else{S.view="home";render()}};
+  nx.onclick=function(){
+    if(!it.txt&&S.ans[it.k]==null)return;
+    if(!last){S.step++;render();return}
+    var a=S.ans,n=new Date();
+    submit({id:uid(),date:n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate()),heure:pad(n.getHours())+":"+pad(n.getMinutes()),
+      patineuse:S.skater,moment:"debut",sommeil:a.sommeil,stress:a.stress,fatigue:a.fatigue,courbatures:a.courbatures,
+      hooper:Math.round((a.sommeil+a.stress+a.fatigue+a.courbatures)*10)/10,
+      motivation:a.motivation,confiance:a.confiance,humeur:a.humeur,commentaire:(a.commentaire||"").trim(),seance:"",rpe:"",duree:""});
+    S.view="done";render();
+  };
+}
+
+function rpePage(){
+  var has=S.ans.rpe!=null,cur=has?RPE[S.ans.rpe]:null;
+  app.innerHTML=head('<span class="muted">'+esc(S.skater)+'</span>')+
+   '<div class="q"><div><h2>Comment était la séance pour toi ?</h2><p class="hint" style="margin-top:8px">Pense à tout l’effort de la séance, pas seulement à la fin. '+esc(cfg.seance)+' · '+cfg.duree+' min</p></div>'+
+   '<div><div class="face" id="fc">'+(cur?cur[0]:"🤔")+'</div><div class="rpeword" id="wd">'+(cur?esc(cur[1]):"")+'</div><div id="sh"></div>'+
+   '<div class="ends"><span>Très très facile</span><span>Maximal</span></div></div>'+
+   '<div class="nav"><button class="btn ghost" id="bk">Annuler</button><button class="btn" id="nx"'+(has?"":" disabled")+'>Envoyer</button></div></div>';
+  var nx=document.getElementById("nx");
+  slider(document.getElementById("sh"),{discrete:true,min:0,max:10,value:S.ans.rpe,onChange:function(v){
+    S.ans.rpe=v;document.getElementById("fc").textContent=RPE[v][0];document.getElementById("wd").textContent=RPE[v][1];nx.disabled=false}});
+  document.getElementById("bk").onclick=function(){S.view="home";render()};
+  nx.onclick=function(){
+    if(S.ans.rpe==null)return;
+    var n=new Date();
+    submit({id:uid(),date:n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate()),heure:pad(n.getHours())+":"+pad(n.getMinutes()),
+      patineuse:S.skater,moment:"fin",sommeil:"",stress:"",fatigue:"",courbatures:"",hooper:"",motivation:"",confiance:"",humeur:"",commentaire:"",
+      seance:cfg.seance,rpe:S.ans.rpe,duree:cfg.duree});
+    S.view="done";render();
+  };
+}
+
+function done(){
+  app.innerHTML=head()+'<div class="done"><div class="tick">✓</div><h2>Merci '+esc(S.skater)+' !</h2><p class="muted">Passe la tablette à la suivante.</p><button class="btn" id="nxt">Suivante</button></div>';
+  function back(){clearTimeout(doneTimer);S.view="home";S.skater=null;render()}
+  document.getElementById("nxt").onclick=back;
+  clearTimeout(doneTimer);doneTimer=setTimeout(back,3000);
+}
+
+window.addEventListener("online",flush);
+setInterval(flush,30000);
+render();loadRoster();flush();
+})();
+</script>
+</body>
+</html>
